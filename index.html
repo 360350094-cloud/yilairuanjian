@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>依赖工作室定位软件教程中心</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background-color: #05070e;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    font-family: "Microsoft YaHei", sans-serif;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+  .container { width: 100%; max-width: 500px; }
+  .header { text-align: center; margin-bottom: 30px; }
+  .header h1 {
+    font-size: 28px; font-weight: bold; letter-spacing: 2px; margin-bottom: 10px;
+    color: #fff; text-shadow: 0 0 10px rgba(0,195,255,0.3);
+  }
+  .header p { font-size: 13px; color: #8c9bb4; }
+  .search-box { margin-bottom: 25px; }
+  .search-box input {
+    width: 100%; padding: 12px 15px;
+    background: rgba(15,19,32,0.8);
+    border: 1px solid rgba(0,195,255,0.2);
+    color: #fff; outline: none; font-size: 13px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  }
+  .search-box input::placeholder { color: #5a6b85; }
+  .card {
+    background: rgba(15,19,32,0.95);
+    border: 1px solid rgba(0,195,255,0.15);
+    padding: 18px; margin-bottom: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%; background: #00c3ff; opacity: 0.5;
+  }
+  .card-title {
+    font-size: 18px; font-weight: bold; color: #00c3ff;
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .card-title-underline { width: 30px; height: 2px; background: #00c3ff; margin-bottom: 10px; }
+  .card-desc { font-size: 12px; color: #a0aec0; line-height: 1.5; margin-bottom: 15px; }
+  .btn-group { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
+  .btn {
+    flex: 1; min-width: 70px; border: none; cursor: pointer; transform: skewX(-15deg);
+    height: 34px; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    text-decoration: none;
+  }
+  .btn span { transform: skewX(15deg); font-size: 12px; font-weight: bold; letter-spacing: 1px; color: #fff; }
+  .btn-video { background: linear-gradient(90deg,#0055aa,#0077cc); border:1px solid #0099ff; }
+  .btn-download { background: linear-gradient(90deg,#cc5500,#ff7700); border:1px solid #ff9900; }
+  .btn-share { background: linear-gradient(90deg,#442288,#663399); border:1px solid #8844cc; }
+  .btn-buy { background: linear-gradient(90deg,#b000b0,#e000e0); border:1px solid #ff44ff; }
+  .btn:hover { filter: brightness(1.2); }
+
+  /* 公告弹窗 */
+  .modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; backdrop-filter: blur(3px);
+  }
+  .modal-mask.hidden { display: none; }
+  .modal {
+    width: 90%; max-width: 380px;
+    background: #0f1525; border: 1px solid rgba(0,195,255,0.25);
+    box-shadow: 0 0 30px rgba(0,195,255,0.15);
+    padding: 28px 22px 22px; position: relative;
+  }
+  .modal-title {
+    text-align: center; font-size: 20px; font-weight: bold; color: #00c3ff;
+    margin-bottom: 20px; letter-spacing: 1px;
+  }
+  .modal-section { margin-bottom: 16px; }
+  .modal-section .sub-title {
+    font-size: 14px; color: #fff; font-weight: bold; margin-bottom: 8px;
+    border-left: 3px solid #00c3ff; padding-left: 8px;
+  }
+  .modal-section ol, .modal-section ul {
+    padding-left: 20px; font-size: 12.5px; color: #a0aec0; line-height: 1.9;
+  }
+  .modal-section ol li span { color: #00c3ff; font-weight: bold; }
+  .modal-notice { font-size: 12px; color: #ffaa00; text-align: center; margin-top: 6px; line-height: 1.6; }
+  .modal-feedback { font-size: 12px; color: #22c55e; text-align: center; margin-top: 8px; line-height: 1.6; }
+  .modal-btn {
+    display: block; width: 100%; margin-top: 18px; padding: 12px 0; border: none; cursor: pointer;
+    background: linear-gradient(90deg,#0077cc,#00c3ff); color: #fff; font-size: 15px; font-weight: bold;
+    letter-spacing: 4px; transform: skewX(-15deg); transition: 0.2s;
+  }
+  .modal-btn span { display: block; transform: skewX(15deg); }
+  .modal-btn:hover { filter: brightness(1.15); }
+
+  /* 购买弹窗（叮叮内置版/企微用） */
+  .buy-modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; backdrop-filter: blur(3px);
+  }
+  .buy-modal-mask.show { display: flex; }
+  .buy-modal {
+    width: 90%; max-width: 360px;
+    background: #0f1525; border: 1px solid rgba(255,68,255,0.3);
+    box-shadow: 0 0 30px rgba(255,68,255,0.15);
+    padding: 26px 22px 20px; position: relative;
+  }
+  .buy-modal-title {
+    text-align: center; font-size: 19px; font-weight: bold; color: #ff44ff;
+    margin-bottom: 18px; letter-spacing: 1px;
+  }
+  .buy-modal-step {
+    font-size: 13px; color: #a0aec0; line-height: 2;
+    margin-bottom: 14px;
+  }
+  .buy-modal-step span { color: #00c3ff; font-weight: bold; }
+  .buy-modal-price {
+    background: rgba(255,68,255,0.06);
+    border: 1px solid rgba(255,68,255,0.2);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .buy-modal-price .price-title {
+    font-size: 13px; color: #fff; font-weight: bold; margin-bottom: 6px;
+  }
+  .buy-modal-price ul { padding-left: 16px; font-size: 12.5px; color: #a0aec0; line-height: 1.9; }
+  .buy-modal-price ul li span { color: #ff44ff; font-weight: bold; }
+  .buy-modal-tip {
+    font-size: 12px; color: #ffaa00; text-align: center; margin-top: 8px; line-height: 1.6;
+  }
+  .buy-modal-btn {
+    display: block; width: 100%; margin-top: 16px; padding: 11px 0; border: none; cursor: pointer;
+    background: linear-gradient(90deg,#cc00cc,#ff44ff); color: #fff; font-size: 14px; font-weight: bold;
+    letter-spacing: 3px; transform: skewX(-15deg); transition: 0.2s;
+  }
+  .buy-modal-btn span { display: block; transform: skewX(15deg); }
+  .buy-modal-btn:hover { filter: brightness(1.15); }
+
+  /* 尾插专属购买弹窗 */
+  .tail-buy-modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1001; backdrop-filter: blur(3px);
+  }
+  .tail-buy-modal-mask.show { display: flex; }
+  .tail-buy-modal {
+    width: 90%; max-width: 360px;
+    background: #0f1525; border: 1px solid rgba(0,255,200,0.3);
+    box-shadow: 0 0 30px rgba(0,255,200,0.15);
+    padding: 26px 22px 20px; position: relative;
+  }
+  .tail-buy-modal-title {
+    text-align: center; font-size: 19px; font-weight: bold; color: #00ffc8;
+    margin-bottom: 16px; letter-spacing: 1px;
+  }
+  .tail-buy-desc {
+    font-size: 12.5px; color: #a0aec0; line-height: 1.8; margin-bottom: 14px;
+  }
+  .tail-buy-desc span { color: #00ffc8; font-weight: bold; }
+  .tail-buy-price {
+    background: rgba(0,255,200,0.06);
+    border: 1px solid rgba(0,255,200,0.2);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .tail-buy-price .price-title {
+    font-size: 13px; color: #fff; font-weight: bold; margin-bottom: 6px;
+  }
+  .tail-buy-price ul { padding-left: 16px; font-size: 12.5px; color: #a0aec0; line-height: 1.9; }
+  .tail-buy-price ul li span { color: #00ffc8; font-weight: bold; }
+  .tail-buy-tip {
+    font-size: 12px; color: #ffaa00; text-align: center; margin-top: 8px; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+  <!-- 公告弹窗 -->
+  <div class="modal-mask" id="noticeModal">
+    <div class="modal">
+      <div class="modal-title">📢 公告通知</div>
+      <div class="modal-section">
+        <div class="sub-title">核心功能</div>
+        <ol>
+          <li><span>一键瞬移：</span>模拟真实定位，打卡、签到、改位置，丝滑不卡顿。</li>
+          <li><span>多开分身：</span>一部手机，多个账号，互不干扰，玩转社交。</li>
+          <li><span>精准防护：</span>底层驱动，模拟数据精准，不被检测，安全稳定。</li>
+        </ol>
+      </div>
+      <div class="modal-section">
+        <div class="sub-title">适用场景</div>
+        <ul>
+          <li>🏢 <span style="color:#fff;">职场人：</span>轻松解决异地打卡，告别通勤迟到。</li>
+          <li>🎮 <span style="color:#fff;">游戏党：</span>改定位换周边，抓精灵、跑地图，世界任你遨游。</li>
+          <li>📱 <span style="color:#fff;">社交控：</span>隐藏真实位置，拓展社交圈，邂逅有趣灵魂。</li>
+        </ul>
+      </div>
+      <div class="modal-notice">
+        💡 本站所有教程仅供技术学习研究<br>禁止用于违规、违法用途，违者后果自负
+      </div>
+      <div class="modal-feedback">
+        💬 问题反馈绿泡泡：360350094
+      </div>
+      <button class="modal-btn" onclick="document.getElementById('noticeModal').classList.add('hidden')">
+        <span>确 定</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 叮叮内置版/企微 购买弹窗 -->
+  <div class="buy-modal-mask" id="buyModal">
+    <div class="buy-modal">
+      <div class="buy-modal-title">💜 购买激活码</div>
+      <div class="buy-modal-step">
+        <span>第1步：</span>点击下方按钮进入下载页面，安装软件后打开<br>
+        <span>第2步：</span>复制软件内的<span>设备码</span><br>
+        <span>第3步：</span>将设备码发送给客服，获取对应激活码
+      </div>
+      <div class="buy-modal-price">
+        <div class="price-title">💰 套餐价格</div>
+        <ul>
+          <li>月卡：<span>20 元</span></li>
+          <li>季卡：<span>55 元</span></li>
+          <li>半年卡：<span>100 元</span></li>
+        </ul>
+      </div>
+      <div class="buy-modal-tip">
+        💬 设备码和付款截图发给客服即可获取激活码<br>问题反馈绿泡泡：360350094
+      </div>
+      <button class="buy-modal-btn" id="buyDownloadBtn">
+        <span>进入下载页面</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 尾插 专属购买弹窗 -->
+  <div class="tail-buy-modal-mask" id="tailBuyModal">
+    <div class="tail-buy-modal">
+      <div class="tail-buy-modal-title">🔌 苹果尾插购买说明</div>
+      <div class="tail-buy-desc">
+        苹果手机2026新款尾插排线，适配 <span>6-18 全系列和平板</span>，支持 <span>iOS12-27</span> 最新系统，带 Type-C 口和 Lightning 接口。
+      </div>
+      <div class="tail-buy-price">
+        <div class="price-title">💰 价格表</div>
+        <ul>
+          <li>单口：<span>100 元</span></li>
+          <li>双口：<span>158 元</span></li>
+        </ul>
+      </div>
+      <div class="tail-buy-tip">
+        🚚 顺丰包邮 ｜ 售后质量问题包退包换<br>💬 问题反馈绿泡泡：360350094
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>依赖工作室定位软件教程中心</h1>
+      <p>根据您下载的软件，查看对应的使用演示</p>
+    </div>
+
+    <div class="search-box">
+      <input type="text" placeholder="搜索软件名称...">
+    </div>
+
+    <!-- VHD -->
+    <div class="card">
+      <div class="card-title">VHD</div>
+      <div class="card-title-underline"></div>
+      <div class="card-desc">VHD是可以修改钉钉，搭配钉钉定制版使用，适配钉钉签到打卡场景。</div>
+      <div class="btn-group">
+        <a class="btn btn-video" href="https://share.feijipan.com/s/upwvsGEM" target="_blank"><span>视频教程</span></a>
+        <a class="btn btn-download" href="https://share.feijipan.com/s/upwvsGEM" target="_blank"><span>下载软件</span></a>
+        <a class="btn btn-share" href="https://share.feijipan.com/s/upwvsGEM" target="_blank"><span>分享链接</span></a>
+        <a class="btn btn-buy" href="https://fk.n5c.cn/gbzHbq" target="_blank"><span>购买地址</span></a>
+      </div>
+    </div>
+
+    <!-- 全局定位 -->
+    <div class="card">
+      <div class="card-title">全局定位</div>
+      <div class="card-title-underline"></div>
+      <div class="card-desc">全局定位是可以修改微信小程序、公众号、钉钉、飞书等位置，安卓全局虚拟定位工具。</div>
+      <div class="btn-group">
+        <a class="btn btn-video" href="https://my.feishu.cn/wiki/WvCEwHmohiMgS9kzFBecVUdAnRa?from=from_copylink" target="_blank"><span>视频教程</span></a>
+        <a class="btn btn-download" href="https://share.feijipan.com/s/9l8LHPLL" target="_blank"><span>下载软件</span></a>
+        <a class="btn btn-share" href="https://share.feijipan.com/s/9l8LHPLL" target="_blank"><span>分享链接</span></a>
+        <a class="btn btn-buy" href="https://fk.n5c.cn/c9XuTP" target="_blank"><span>购买地址</span></a>
+      </div>
+    </div>
+
+    <!-- 袋鼠多开 -->
+    <div class="card">
+      <div class="card-title">袋鼠多开</div>
+      <div class="card-title-underline"></div>
+      <div class="card-desc">袋鼠多开是安卓多开分身工具，支持应用无限多开，独立隔离环境，账号互不冲突，适配社交类APP；激活后开分身并开启位置保护即可修改打卡位置。</div>
+      <div class="btn-group">
+        <a class="btn btn-video" href="https://my.feishu.cn/wiki/U1M4wWiDGiw1tRkopwrcfnYynXe?from=from_copylink" target="_blank"><span>视频教程</span></a>
+        <a class="btn btn-download" href="https://share.feijipan.com/s/4z9O7ezJ" target="_blank"><span>下载软件</span></a>
+        <a class="btn btn-share" href="https://share.feijipan.com/s/4z9O7ezJ" target="_blank"><span>分享链接</span></a>
+        <a class="btn btn-buy" href="https://fk.n5c.cn/TFtsGo" target="_blank"><span>购买地址</span></a>
+      </div>
+    </div>
+
+    <!-- 叮叮（内置版） -->
+    <div class="card">
+      <div class="card-title">叮叮（内置版）</div>
+      <div class="card-title-underline"></div>
+      <div class="card-desc">钉位，钉钉专用位置模拟工具，一键修改定位，适配钉钉签到打卡场景。</div>
+      <div class="btn-group">
+        <a class="btn btn-video" href="http://b.u6v.cn/63cT2K" target="_blank"><span>视频教程</span></a>
+        <a class="btn btn-download" href="https://share.feijipan.com/s/uKZvMP5V" target="_blank"><span>下载软件</span></a>
+        <a class="btn btn-share" href="https://share.feijipan.com/s/uKZvMP5V" target="_blank"><span>分享链接</span></a>
+        <button class="btn btn-buy" onclick="openBuyModal('https://share.feijipan.com/s/uKZvMP5V')"><span>购买地址</span></button>
+      </div>
+    </div>
+
+    <!-- 企业微信定位 -->
+    <div class="card">
+      <div class="card-title">企业微信定位</div>
+      <div class="card-title-underline"></div>
+      <div class="card-desc">企业微信定位工具，针对企微签到开发，支持GPS模拟，修改打卡位置。</div>
+      <div class="btn-group">
+        <a class="btn btn-video" href="https://flowus.cn/hckj/share/2dc50ad8-a7d3-4bc8-98f2-3af36f336f6b?code=MWSYWJ" target="_blank"><span>视频教程</span></a>
+        <a class="btn btn-download" href="https://share.feijipan.com/s/gf9CFfBX" target="_blank"><span>下载软件</span></a>
+        <a class="btn btn-share" href="https://share.feijipan.com/s/gf9CFfBX" target="_blank"><span>分享链接</span></a>
+        <button class="btn btn-buy" onclick="openBuyModal('https://share.feijipan.com/s/gf9CFfBX')"><span>购买地址</span></button>
+      </div>
+    </div>
+
+    <!-- 苹果外置设备（尾插） -->
+    <div class="card">
+      <div class="card-title">苹果外置设备（尾插）</div>
+      <div class="card-title-underline"></div>
+      <div class="card-desc">可以修改苹果手机所有应用位置，苹果6-18都支持。</div>
+      <div class="btn-group">
+        <a class="btn btn-video" href="https://my.feishu.cn/wiki/KzgQwra23icKANkGMmQcgEgvnDd" target="_blank"><span>视频教程</span></a>
+        <a class="btn btn-download" href="https://my.feishu.cn/wiki/KzgQwra23icKANkGMmQcgEgvnDd" target="_blank"><span>下载软件</span></a>
+        <a class="btn btn-share" href="#" target="_blank"><span>分享链接</span></a>
+        <button class="btn btn-buy" onclick="document.getElementById('tailBuyModal').classList.add('show')"><span>购买地址</span></button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let buyDownloadUrl = '';
+
+  function openBuyModal(url) {
+    buyDownloadUrl = url;
+    document.getElementById('buyModal').classList.add('show');
+  }
+
+  document.getElementById('buyDownloadBtn').addEventListener('click', function() {
+    window.open(buyDownloadUrl, '_blank');
+  });
+
+  document.getElementById('buyModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('show');
+    }
+  });
+
+  document.getElementById('tailBuyModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('show');
+    }
+  });
+</script>
+
+</body>
+</html>
